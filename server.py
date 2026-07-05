@@ -97,3 +97,48 @@ def name_search():
             return person, 200
 
     return {"message": "Person not found"}, 404
+
+@app.route("/count")
+def count():
+    try:
+        return {"data count": len(data)}, 200
+    except NameError:
+        return {"message": "data not defined"}, 500
+
+@app.route("/person/<uuid:id>")
+def find_by_uuid(id):
+    for person in data:
+        if person["id"] == str(id):
+            return person
+
+    return {"message": "Person not found"}, 404
+
+@app.route("/person/<uuid:id>", methods=['DELETE'])
+def delete_person(id):
+    for person in data:
+        if person["id"] == str(id):
+            data.remove(person)
+            return {"message": "Person with ID deleted"}, 200
+    return {"message": "Person not found"}, 404
+
+@app.route("/person", methods=['POST'])
+def create_person():
+    new_person = request.get_json()
+
+    if not new_person:
+        return {"message": "Invalid input, no data provided"}, 422
+    return {"message": f"{new_person['id']}"}, 200
+
+@app.route("/test500")
+def test500():
+    raise Exception("Forced exception for testing")
+
+@app.errorhandler(404)
+def api_not_found(error):
+    return {"message": "API not found"}, 404
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return {"message": str(e)}, 500
+
+
